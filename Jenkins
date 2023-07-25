@@ -1,0 +1,277 @@
+Jenkins
+
+Create Ec2 with Ubuntu AMI
+
+Add 8080 port inbound rule
+
+https://www.jenkins.io/doc/book/installing/linux/
+
+sample repo
+https://github.com/jenkins-docs/simple-java-maven-app.git
+
+sudo su
+
+snap install openjdk
+
+snap install curl
+
+Step 1:
+curl -fsSL https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key | sudo tee \
+  /usr/share/keyrings/jenkins-keyring.asc > /dev/null
+echo deb [signed-by=/usr/share/keyrings/jenkins-keyring.asc] \
+  https://pkg.jenkins.io/debian-stable binary/ | sudo tee \
+  /etc/apt/sources.list.d/jenkins.list > /dev/null
+sudo apt-get update
+sudo apt-get install jenkins
+
+Step 2:
+sudo apt update
+sudo apt install openjdk-17-jre
+java -version
+openjdk version "17.0.7" 2023-04-18
+OpenJDK Runtime Environment (build 17.0.7+7-Debian-1deb11u1)
+OpenJDK 64-Bit Server VM (build 17.0.7+7-Debian-1deb11u1, mixed mode, sharing)
+
+Step 3:
+sudo systemctl enable jenkins
+
+Step 4:
+sudo systemctl start jenkins
+
+Step 5:
+sudo systemctl status jenkins
+
+copy passworld location
+
+type cat <location>
+
+My username: motheesagar
+
+
+Task:
+Compile -> compile 
+Code Review -> pmd:pmd
+Unit Testing -> test
+Package -> package
+
+
+Create account
+
+New item
+
+Name project
+
+freestyle project
+
+ok
+
+give description
+
+write a shell code
+
+apply and save
+
+Once maven folder is installed in pc. it will be in C>Users>.m2(hidden)
+
+
+maven plugins:
+maven compiler plugin
+maven pmd plugin
+maven surefire plugin
+maven package plugin
+
+manage jenkins > Plugins
+
+search for maven
+
+find maven integration
+
+install without restart
+
+go to manage jenkins > Tools
+
+add maven
+
+name maven and install automatically
+
+get a sample github code
+
+create a new item
+
+add github sourcecode
+
+paste repo url
+
+in pre steps, invole top level maven targets
+
+How to automatically trigger compile:
+
+In the project > Buiuld triggers > Poll SCM (Source code management) or WebHook
+	Use CRON Pattern: */1 * * * * for every 1 minute
+
+Pipeline type:
+all types use groovy script
+
+Declarative Pipeline --> Predefined scripts
+Scripted Pipeline --> Customizable scripts
+
+Paac --> Pipeline as a code
+
+Pipeline script syntax:
+pipeline {
+	agent any
+	tools {
+	maven "Maven_PC"
+	}
+	stages {
+	stage('')
+	}
+}
+
+Master - Slave:
+
+Create minimum 2 ec2
+
+Master machine initial setup:
+	USE Ubuntu ami
+	USE t2. Medium
+	FOR MASTER USE cloudshell (suggestion)
+	START cloudshell
+	LOGIN TO MASTER EC2:
+		UPLOAD pem key
+		chmod 400 <pem key>
+		COPY CODE UNDER EXAMPLE IN Connect > SSH Client
+
+	INSTALL jenkins #use code mentioned in beginning of class if needed
+	sudo su
+	whoami
+		#to check which user you are
+		#if you are already jenkins, skip next line.
+	cat /etc/passwd
+		#to check all users in machine like root user
+		#note if jenkins user is present if not reinstall jenkins
+		#make sure end of jenkins user is "/bin/bash" and not "/bin/false, if not run next line.
+			sudo chsh -s /bin/bash jenkins
+	su jenkins
+		#change to jenkins user
+
+
+Slave machine initial setup:
+	USE ubuntu ami and t2 medium
+	USE direct connect to run slave ec2
+
+
+In Master:
+	ssh-keygen
+		Cick on 3 enters
+		#public and private key pair is generated
+		#note created location in response, usually var/lib/jenkins
+	cd var/lib/jenkins
+	cd .ssh
+	ls
+		#to list the available files
+		#2 files should be visible
+		#Note the one ending with .pub as public key
+
+
+In Slave:
+sudo su
+
+apt update -y
+
+apt install default-jdk -y
+	#Need to install java
+
+java --version
+	#check java version
+	#atleast 11th version should be installed
+
+cat /etc/passwd
+	#You cannot see jenkins as we haven't install jenkins
+
+sudo useradd jenkins
+	#adds jenkins user
+
+sudo passwd jenkins
+	#set password for jenkins user
+	#will be used later, so note it.
+
+cat /etc/passwd
+	#Note newly added jenkins user is present
+
+cd /etc/ssh
+ls
+	#Note the file sshd_config
+vi sshd_config
+	#find "#PubKeyAuthentication yes"
+	REMOVE "#" (a.k.a. uncomment)
+	#find "PubKeyAuthentication no"
+	ADD "#" (a.k.a. comment)
+	:wq! #save the change
+	systemctl restart sshd
+	cd ~ #go to home folder (Like desktop)
+	sudo mkdir /home/jenkins #create a folder
+	sudo chown -R jenkins:jenkins /home/jenkins #give ownership of folder to jenkins
+	sudo chmod 700 /home/jenkins
+
+
+in Master:
+pwd #Print working directory (check where you are)
+	#check if you are already in .ssh folder or not. If you are in .ssh use the second command
+
+ssh-copy-id -i ~/.ssh/id_rsa.pub jenkins@<slave ip address> -y
+	#if already in .ssh, use:
+		ssh-copy-id -i ~/id_rsa.pub jenkins@<slave ip address> -y
+	#incase of difficulty, use:
+		cd .. 
+		ssh-copy-id -i ~/.ssh/id_rsa.pub jenkins@<slave ip address> -y
+		ENTER PASSWORD
+
+
+Go to Jenkins:
+	<master public ip>:8080
+	LOGIN
+	GO TO MANAGE JENKINS
+	CHOOSE SET UP AGENT
+	NAME NODE LIKE "SlaveNode"
+	MAKE PERMENANT AGENT
+		#number of executors will be how many jobs it can run concurrently
+	ADD "/home/jenkins" TO REMOTE ROOT DIRECTORY
+	GIVE LABEL LIKE "SlaveMachines"
+	CHANGE "Launch method" TO "Launch agent via SSH"
+		IN "Host" ENTER SLAVE MACHINCE'S PUBLIC IP ADDRESS
+	ADD CREDENTIALS
+		"Domain" "Global.."
+		"Kind" "SSH Username with private key"
+			"Scope" "Global.."
+			"ID" "Slave"
+			"Username" "jenkins"
+
+Go to master terminal:
+	cd var/lib/jenkins
+	cd .ssh
+	cat id_rsa
+		#a text will be displayed
+		#text will start with ---- and end with ---
+	COPY THE WHOLE TEXT FROM --- TO ---
+
+Go to Jenkins:
+		RETURN TO WHERE WE LEFT
+		CLICK ON "Enter directly" FOR "Private Key"
+		"Add"
+		PASTE THE PRIVATE KEY
+		"Add"
+			#you will exit back to previous menu
+		SELECT NEW CREDENTIALS
+		"Save"
+		#we are going to create a project to test this
+		CREATE A FREESTYLE PROJECT
+		"Restrict where this project can be run" ENTER "SlaveMachines"
+			#note the text that says label matches 1 node.
+		CHOOSE TO EXECUTE SHELL
+			echo "Your text"
+		SAVE IT
+		"Build Now"
+		CHECK "Console Output"
+
+	#if you go to the slave machine and to the folder mentioned in the output, you can see it

@@ -1,0 +1,87 @@
+GIT
+
+Create an account with Github
+
+download Git bash
+
+One time setup:
+go to your folfer
+	git init
+	git config --global user.name <Username>
+	git config --global user.email <emailid>
+go to git hub
+copy url of your repository from CODE option
+	git remote add origin <URL>
+
+Daily:
+	pull data
+	git status
+	git commit -m "<Note>"
+	Git push -u origin master
+
+	when new to company:
+	we must clone the code we will work on.
+
+	go to folder in which we want to clone our code from github
+
+	Option 1. DOwnload zip file 
+		go to the git repo. click on the green code button. choose download ZIP
+
+		Paste the downloaded zip in the folder of our choice and unzip.
+
+	Option 2. Clone command
+		go to the folder
+		right click in the windows folder
+		click on open git bash here
+			git clone <url>
+			since using git clone command, no need to setup initial username and email id as it will get from the repo.
+
+	Installing and using git in Ec2 linux:
+	login to linux
+		sudo su
+		yum install -y git
+		git --version
+		mkdir <folder>
+		cd <folder>
+		touch <filename.txt> + vi <filename.txt>
+			or vi <filename.txt>
+		Once the file is open. Press i to start inserting text.
+		once text is added press esc then :wq! to save
+		ls
+			You should now see the file
+		cat <filename.txt>
+
+		git init
+		ls -a	
+			You can see the hidden folder as well
+		git config --global user.name <username>
+		git config --global user.email <emailid>
+		git remote add origin <URL>
+		go to github
+		go to settings
+		go to developer settings
+		go to PAT
+		Generate PAT Token with all options and expiry
+			use this token to login
+
+		git log		to see logs
+		git log --oneline	to see one line log
+
+			git rm <filename.txt> 	to remove file in staging area and local machine
+
+		git rm --cached <filename.txt> 	to remove file from staging area alone
+
+			git commit --amend		change previous commit message
+
+		head	always point the recent commit
+
+		reset	Delete the recent commit file 	once deleted cannot be recovered
+			git reset --hard <7characters of commit id>
+
+
+		revert	head will point to the previous commit and it will not delete the commit
+			git revert commitid
+
+		git pull to download all missing data from github
+
+		git fetch	download data to staging area but not modify to local machine untill you call

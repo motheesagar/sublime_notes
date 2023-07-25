@@ -1,0 +1,30 @@
+DevOps
+
+Devops is not a tool but a process.
+
+First Tool
+Source Code Management:
+
+Dev/Tester gives code. called source code.
+to maintain the source code, we need source code management tools
+
+Version COntrol System:
+
+-Keep track of changes done
+
+Types of VCS:
+CVCS> Centralized version control system
+DVCS> Distributed version control System
+
+CVCS:
+All our code is in a centralized server.
+When multiple developers add their code to the same version of source code. the cvcs had trouble deciding which to be put first.
+
+so cvcs has lock in and check in of code.
+
+once checked in by a developer, the code will be unavailable for modification to other developers.
+
+DVCS:
+All code will be available to all developers.
+
+Popular Tools are, git/github, gitlab, source tree, tortoise git, bit bucket.
